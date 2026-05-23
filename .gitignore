@@ -1,0 +1,10 @@
+# Složky generované kompilací
+bin/
+obj/
+.azurefunctions/
+
+# Místní nastavení s tajnými klíči
+local.settings.json
+
+# Uživatelské nastavení VS Code
+.vscode/
