@@ -30,17 +30,22 @@ Add-PnPField -List $clenListTitle -DisplayName "Datum registrace" -InternalName 
 Add-PnPField -List $clenListTitle -DisplayName "Poznámka" -InternalName "Poznamka" -Type Note -AddToDefaultView
 
 # 4.1.b. Nastavení unikátnosti pro sloupec NetID
-Write-Host "Nastavuji sloupec NetID jako unikátní..." -ForegroundColor Yellow
+Write-Host "Nastavuji sloupec NetID a NfcID jako unikátní..." -ForegroundColor Yellow
 
 # Načtení pole
 $netIdField = Get-PnPField -List $clenListTitle -Identity "NetID"
+$nfcIdField = Get-PnPField -List $clenListTitle -Identity "NfcID"
 
 # SharePoint vyžaduje, aby unikátní sloupec byl zároveň indexovaný
 $netIdField.Indexed = $true
+$nfcIdField.Indexed = $true
+
 $netIdField.EnforceUniqueValues = $true
+$nfcIdField.EnforceUniqueValues = $true
 
 # Uložení změn do SharePointu
 $netIdField.Update()
+$nfcIdField.Update()
 Invoke-PnPQuery
 
 Write-Host "Seznam $clenListTitle a jeho pole byly úspěšně vytvořeny!" -ForegroundColor Green
@@ -93,6 +98,22 @@ Add-PnPField -List $vydanaPermanentkaListTitle -DisplayName "Počet možných vs
 Add-PnPField -List $vydanaPermanentkaListTitle -DisplayName "Počet zbývajících vstupů" -InternalName "PocetZbyvajicichVstupu" -Type Number -AddToDefaultView
 Add-PnPField -List $vydanaPermanentkaListTitle -DisplayName "Typ permanentky" -InternalName "TypPermanentky" -Type Text -AddToDefaultView
 Add-PnPField -List $vydanaPermanentkaListTitle -DisplayName "Cena" -InternalName "Cena" -Type Currency -AddToDefaultView
+
+# 4.3.b. Nastavení indexovaných sloupců
+Write-Host "Nastavuji indexované sloupce..." -ForegroundColor Yellow
+
+# Načtení pole
+$clenIdField = Get-PnPField -List $vydanaPermanentkaListTitle -Identity "ClenID"
+$stavField = Get-PnPField -List $vydanaPermanentkaListTitle -Identity "Stav"
+
+# Nastavení pole jako indexované
+$clenIdField.Indexed = $true
+$stavField.Indexed = $true
+
+# Uložení změn do SharePointu
+$clenIdField.Update()
+$stavField.Update()
+Invoke-PnPQuery
 
 Write-Host "Seznam $vydanaPermanentkaListTitle a jeho pole byly úspěšně vytvořeny!" -ForegroundColor Green
 
