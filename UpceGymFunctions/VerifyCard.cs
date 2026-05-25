@@ -1,14 +1,9 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using Microsoft.Graph;
-using Azure.Identity;
 
 namespace UpceGym.Functions
 {
@@ -93,6 +88,7 @@ namespace UpceGym.Functions
                 // 4. KROK: Validace byznys logiky nad permanentkami
                 bool maPlatnyVstup = false;
                 string duvodZamitnuti = "Žádná z permanentek nesplňuje podmínky vstupu.";
+                string platnaPermiceId = string.Empty;
                 DateTime dnes = DateTime.Today;
 
                 _logger.LogInformation($"Počet nalezených aktivních permanentek pro člena v databázi: {permanentky.Count}");
@@ -135,6 +131,7 @@ namespace UpceGym.Functions
                     if (stav == "Aktivní" && jeZaplacena && dnes >= platnostOd && dnes <= platnostDo && pocetVstupu > 0)
                     {
                         maPlatnyVstup = true;
+                        platnaPermiceId = perm.Id ?? string.Empty; // Uložíme ID řádku permanentky, ze které bude odečítán vstup
                         break; // Našli jsme platnou permanentku, končíme cyklus
                     }
                 }
@@ -143,8 +140,18 @@ namespace UpceGym.Functions
                 if (maPlatnyVstup)
                 {
                     _logger.LogInformation($"Vstup POVOLEN pro člena {jmenoClena}.");
-                    response.StatusCode = HttpStatusCode.OK;
-                    await response.WriteAsJsonAsync(new { allowed = true, message = $"Vítej, {jmenoClena}! Vstup povolen." });
+                    
+                    var successResponse = req.CreateResponse(HttpStatusCode.OK);
+                    
+                    // Do JSON odpovědi přibalíme data, která si bezstavový turniket na chvíli uloží do paměti
+                    await successResponse.WriteAsJsonAsync(new { 
+                        allowed = true, 
+                        message = $"Vítej, {jmenoClena}! Vstup povolen.",
+                        clenId = clenId,
+                        permanentkaId = platnaPermiceId
+                    });
+                    
+                    return successResponse;
                 }
                 else
                 {

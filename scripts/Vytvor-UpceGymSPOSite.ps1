@@ -133,6 +133,29 @@ Add-PnPField -List $navstevaListTitle -DisplayName "Čas odchodu" -InternalName 
 Add-PnPField -List $navstevaListTitle -DisplayName "Vydaná permanentka ID" -InternalName "VydanaPermanentkaID" -Type Number -AddToDefaultView
 Add-PnPField -List $navstevaListTitle -DisplayName "Člen ID" -InternalName "ClenID" -Type Number -AddToDefaultView
 
+# 4.4.b. Nastavení indexovaných sloupců
+Write-Host "Nastavuji indexované sloupce..." -ForegroundColor Yellow
+
+# Načtení pole
+$clenIdField = Get-PnPField -List $navstevaListTitle -Identity "ClenID"
+$vydanaPermanentkaIdField = Get-PnPField -List $navstevaListTitle -Identity "VydanaPermanentkaID"
+$casPrichoduField = Get-PnPField -List $navstevaListTitle -Identity "CasPrichodu"
+$casOdchoduField = Get-PnPField -List $navstevaListTitle -Identity "CasOdchodu"
+
+
+# Nastavení pole jako indexované
+$clenIdField.Indexed = $true
+$vydanaPermanentkaIdField.Indexed = $true
+$casPrichoduField.Indexed = $true
+$casOdchoduField.Indexed = $true
+
+# Uložení změn do SharePointu
+$clenIdField.Update()
+$vydanaPermanentkaIdField.Update()
+$casPrichoduField.Update()
+$casOdchoduField.Update()
+Invoke-PnPQuery
+
 Write-Host "Seznam $navstevaListTitle a jeho pole byly úspěšně vytvořeny!" -ForegroundColor Green
 
 
